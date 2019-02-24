@@ -90,52 +90,55 @@ function islandora_solr_views_views_data() {
     ),
   );
 
-  // Loop over all solr fields.
-  foreach ($solr_fields as $solr_field_name => $solr_field) {
+  // Loop over all solr fields, but first check that $solr_fields is defined to avoid throwing a warning.
+  if ($solr_fields) {
+    foreach ($solr_fields as $solr_field_name => $solr_field) {
 
-    // We do not allow to display 'sort_*' fields.
-    if (strpos($solr_field_name, 'sort_') === 0) {
-      continue;
-    }
-    // Set luke field variables.
-    $field_type = $solr_field['type'];
-    $field_schema = $solr_field['schema'];
-    $field_dynamicbase = isset($solr_field['dynamicBase']) ? $solr_field['dynamicBase'] : NULL;
+      // We do not allow to display 'sort_*' fields.
+      if (strpos($solr_field_name, 'sort_') === 0) {
+        continue;
+      }
+      // Set luke field variables.
+      $field_type = $solr_field['type'];
+      $field_schema = $solr_field['schema'];
+      $field_dynamicbase = isset($solr_field['dynamicBase']) ? $solr_field['dynamicBase'] : NULL;
 
-    // Set field handlers.
-    $field = array();
-    $field['title'] = $solr_field_name;
-    $field['help'] = t('Type') . ': ' . $field_type;
-    // Field handler.
-    if ($field_type == 'date') {
-      $field['field']['handler'] = 'islandora_solr_views_handler_field_date';
-    }
-    else {
-      $field['field']['handler'] = 'islandora_solr_views_handler_field';
-    }
-    // Check if sortable.
-    if (strstr($field_schema, "I") != FALSE AND strstr($field_schema, "M") == FALSE) {
-      $field['field']['click sortable'] = TRUE;
-    }
-    // Argument handler.
-    $field['argument'] = array(
-      'handler' => 'islandora_solr_views_handler_argument',
-    );
-    // Filter handler.
-    $field['filter'] = array(
-      'handler' => 'islandora_solr_views_handler_filter',
-    );
-    // Sortable handler.
-    // Check if sortable: must be indexed and can't be multivalued.
-    // http://wiki.apache.org/solr/CommonQueryParameters#sort
-    if (strstr($field_schema, "I") != FALSE AND strstr($field_schema, "M") == FALSE) {
-      $field['sort'] = array(
-        'handler' => 'islandora_solr_views_handler_sort',
+      // Set field handlers.
+      $field = array();
+      $field['title'] = $solr_field_name;
+      $field['help'] = t('Type') . ': ' . $field_type;
+      // Field handler.
+      if ($field_type == 'date') {
+        $field['field']['handler'] = 'islandora_solr_views_handler_field_date';
+      }
+      else {
+        $field['field']['handler'] = 'islandora_solr_views_handler_field';
+      }
+      // Check if sortable.
+      if (strstr($field_schema, "I") != FALSE AND strstr($field_schema, "M") == FALSE) {
+        $field['field']['click sortable'] = TRUE;
+      }
+      // Argument handler.
+      $field['argument'] = array(
+        'handler' => 'islandora_solr_views_handler_argument',
       );
+      // Filter handler.
+      $field['filter'] = array(
+        'handler' => 'islandora_solr_views_handler_filter',
+      );
+      // Sortable handler.
+      // Check if sortable: must be indexed and can't be multivalued.
+      // http://wiki.apache.org/solr/CommonQueryParameters#sort
+      if (strstr($field_schema, "I") != FALSE AND strstr($field_schema, "M") == FALSE) {
+        $field['sort'] = array(
+          'handler' => 'islandora_solr_views_handler_sort',
+        );
+      }
+      // Add array.
+      $data[$base_table][$solr_field_name] = $field;
     }
-    // Add array.
-    $data[$base_table][$solr_field_name] = $field;
   }
+  
   // Add our collection counting goodness.
   $data[$base_table]['solr_collection_count'] = array(
     'title' => 'Collection count',
