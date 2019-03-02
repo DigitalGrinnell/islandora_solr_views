@@ -176,8 +176,10 @@ class islandora_solr_views_query extends views_plugin_query {
       $object_results = $results['response']['objects'];
 
       // Populate views results.
-      foreach ($object_results as $object_result) {
-        $view->result[] = (object) $object_result['solr_doc'];
+      if (is_array($object_results)) {    // MM - Skip this if $object_results is not an array!
+        foreach ($object_results as $object_result) {
+          $view->result[] = (object) $object_result['solr_doc'];
+        }
       }
 
       // Store response.
